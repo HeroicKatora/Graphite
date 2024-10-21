@@ -3,6 +3,8 @@ import { writable } from "svelte/store";
 import { type Editor } from "@graphite/wasm-communication/editor";
 import { TriggerFontLoad } from "@graphite/wasm-communication/messages";
 
+import Departure from "@graphite-frontend/assets/fonts/DepartureMono-1.420/DepartureMono-Regular.otf";
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createFontsState(editor: Editor) {
 	// TODO: Do some code cleanup to remove the need for this empty store
@@ -28,7 +30,7 @@ export function createFontsState(editor: Editor) {
 	async function getFontFileUrl(fontFamily: string, fontStyle: string): Promise<string | undefined> {
 		const font = (await fontList).find((value) => value.family === fontFamily);
 		const fontFileUrl = font?.files.get(fontStyle);
-		return fontFileUrl?.replace("http://", "https://");
+		return fontFileUrl?.replace("^http://", "https://");
 	}
 
 	function formatFontStyleName(fontStyle: string): string {
@@ -62,7 +64,14 @@ export function createFontsState(editor: Editor) {
 		fetch(fontListAPI)
 			.then((response) => response.json())
 			.then((fontListResponse) => {
-				const fontListData = fontListResponse.items as { family: string; variants: string[]; files: Record<string, string> }[];
+				let fontListData = fontListResponse.items as { family: string; variants: string[]; files: Record<string, string> }[];
+
+				fontListData.push({
+					'family': 'DepartureMono',
+					'files': {'400': Departure },
+					'variants': ['400'],
+				})
+
 				const result = fontListData.map((font) => {
 					const { family } = font;
 					const variants = font.variants.map(formatFontStyleName);
